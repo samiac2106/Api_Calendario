@@ -1,0 +1,50 @@
+pipeline{
+    agent any 
+
+    environment {
+        DOCKER_IMAGE = 'calendario-api'
+        CONTAINER_NAME = 'dockercalendario'
+        DOCKER_NETWORK = 'dockerfestivos_red'
+        DOCKER_BUILD_DIR = 'presentacion'
+        HOST_PORT = '9085'
+        CONTAINER_PORT = '8080'
+        
+    }
+    
+    stages{
+        stage('Generar ejecutable MAven'){
+            steps{
+                bat 'mvn clean package -DskipTests'           
+              
+            }
+        }
+    stage('construir la imagen'){
+        steps{
+            dir(DOCKER_BUILD_DIR) {
+                bat "docker build -t ${DOCKER_IMAGE} ."
+                
+                }
+            }
+
+        }
+
+    }
+    // stage(' '){
+    //     steps{
+
+    //     }
+
+    // }
+       stage('Desplegar el contenedor'){
+        steps{
+            script{
+                bat "docker container run --network ${DOCKER_NETWORK} --name ${CONTAINER_NAME} -p ${HOST_PORT}:${CONTAINER_PORT} -d ${DOCKER_IMAGE}"    
+            }
+
+        }
+
+    }
+
+    }
+    
+}
